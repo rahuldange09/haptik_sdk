@@ -24,20 +24,16 @@ class HaptikSdk {
     return _channel.invokeMethod('setNotificationToken', deviceToken);
   }
 
-  Future isHaptikNotification(Map<String, dynamic> payload) async {
-    return (await _channel.invokeMethod('isHaptikNotification', payload))
-        as bool;
+  Future<bool> isHaptikNotification(Map<String, String> payload) async {
+    final result = await _channel.invokeMethod('isHaptikNotification', payload);
+    return result;
   }
 
   // smallIcon is drawable name of icon without extension
-  Future handleNotification(Map<String, dynamic> payload,
+  Future handleNotification(Map<String, String> payload,
       {String smallIcon = "ic_launcher"}) {
-    return _channel.invokeMethod(
-        'handleNotification',
-        payload.putIfAbsent(
-          "small_icon",
-          () => smallIcon,
-        ));
+    return _channel.invokeMethod('handleNotification',
+        payload..putIfAbsent("small_icon", () => smallIcon));
   }
 
   Future setLaunchMessage(String message, {bool hidden = false}) async {

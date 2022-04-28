@@ -35,11 +35,11 @@ class HaptikSdkPlugin : FlutterPlugin, MethodCallHandler {
                 context,
                 call.arguments as String
             )
-            "isHaptikNotification" -> flutterResult.success(HaptikSDK.isHaptikNotification(call.arguments as Map<String, String>))
+            "isHaptikNotification" -> flutterResult.success(HaptikSDK.isHaptikNotification(call.arguments as Map<String, String>?))
             "handleNotification" -> handleNotification(call.arguments as Map<String, String>)
-            "setLaunchMessage"->setLaunchMessage(call.arguments as Map<String, Any?>)
-            "destroy"-> destroy()
-            "logout"-> logout()
+            "setLaunchMessage" -> setLaunchMessage(call.arguments as Map<String, Any?>)
+            "destroy" -> destroy()
+            "logout" -> logout()
 
             else ->
                 result.notImplemented()
@@ -47,21 +47,24 @@ class HaptikSdkPlugin : FlutterPlugin, MethodCallHandler {
     }
 
     private fun init(arguments: Map<String, Any?>?) {
-        HaptikSDK.init(applicationContext = context, initData = InitData().apply {
-            if(arguments!=null) {
-            /*    noHeader = arguments["noHeader"] as Boolean*/
-                uniqueChatIdentifier =  arguments["uniqueChatIdentifier"].toString()
-            }
+        HaptikSDK.init(
+            applicationContext = context,
+            initData = InitData().apply {
+                if (arguments != null) {
+                    /*    noHeader = arguments["noHeader"] as Boolean*/
+                    uniqueChatIdentifier = arguments["uniqueChatIdentifier"].toString()
+                }
 
-        },);
+            },
+        );
     }
 
     private fun loadSignupConversation(arguments: Map<String, Any?>) {
         val signupData = SignupData().apply {
             authCode = arguments["authCode"].toString()
-            if(  arguments["uniqueChatIdentifier"] !=null) {
+            if (arguments["uniqueChatIdentifier"] != null) {
                 authId = "${arguments["authId"]}${arguments["uniqueChatIdentifier"]}"
-            }else{
+            } else {
                 authId = arguments["authId"].toString()
             }
             userName = arguments["userName"].toString()
@@ -74,14 +77,14 @@ class HaptikSdkPlugin : FlutterPlugin, MethodCallHandler {
                 }
             }
         }
-        HaptikSDK.loadConversation(signupData, callback = {
-            response -> flutterResult.success(response.status)
+        HaptikSDK.loadConversation(signupData, callback = { response ->
+            flutterResult.success(response.status)
         })
 
     }
 
-    private  fun loadGuestConversation(){
-        HaptikSDK.loadGuestConversation(callback = {response -> flutterResult.success(response.status) })
+    private fun loadGuestConversation() {
+        HaptikSDK.loadGuestConversation(callback = { response -> flutterResult.success(response.status) })
     }
 
     private fun handleNotification(arguments: Map<String, String>) {
@@ -95,14 +98,19 @@ class HaptikSdkPlugin : FlutterPlugin, MethodCallHandler {
             )
         )
     }
-    private  fun setLaunchMessage(arguments: Map<String, Any?>){
-            HaptikSDK.setLaunchMessage(message = arguments["message"] as String, hidden =  arguments["hidden"] as Boolean)
+
+    private fun setLaunchMessage(arguments: Map<String, Any?>) {
+        HaptikSDK.setLaunchMessage(
+            message = arguments["message"] as String,
+            hidden = arguments["hidden"] as Boolean
+        )
     }
 
-    private  fun destroy(){
+    private fun destroy() {
         HaptikSDK.destroy();
     }
-    private  fun logout(){
+
+    private fun logout() {
         HaptikSDK.logout(context);
     }
 
