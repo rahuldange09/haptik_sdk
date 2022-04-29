@@ -13,12 +13,15 @@ public class SwiftHaptikSdkPlugin: NSObject, FlutterPlugin {
     
   public static func register(with registrar: FlutterPluginRegistrar) {
     let channel = FlutterMethodChannel(name: "haptik_sdk", binaryMessenger: registrar.messenger())
+      
     let instance = SwiftHaptikSdkPlugin()
+      
     registrar.addMethodCallDelegate(instance, channel: channel)
       
 //      let METHOD_CHANNEL_NAME = "flutter.native/nativeModule"
 //           let controller : FlutterViewController = window?.rootViewController as! FlutterViewController
 //          controller.navigationController?.interactivePopGestureRecognizer?.isEnabled = false;
+      
   }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
