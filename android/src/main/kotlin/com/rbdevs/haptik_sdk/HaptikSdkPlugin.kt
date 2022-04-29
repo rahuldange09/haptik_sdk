@@ -62,11 +62,7 @@ class HaptikSdkPlugin : FlutterPlugin, MethodCallHandler {
     private fun loadSignupConversation(arguments: Map<String, Any?>) {
         val signupData = SignupData().apply {
             authCode = arguments["authCode"].toString()
-            if (arguments["uniqueChatIdentifier"] != null) {
-                authId = "${arguments["authId"]}${arguments["uniqueChatIdentifier"]}"
-            } else {
-                authId = arguments["authId"].toString()
-            }
+            authId = arguments["authId"].toString()
             userName = arguments["userName"].toString()
             email = arguments["email"].toString()
             mobileNo = arguments["mobileNo"].toString()

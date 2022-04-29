@@ -5,7 +5,6 @@ class SignupData {
   String? email;
   String? mobileNo;
   String? signupType;
-  String? uniqueChatIdentifier;
   Map<String, dynamic>? customData;
 
   SignupData({
@@ -15,7 +14,6 @@ class SignupData {
     this.email,
     this.mobileNo,
     this.signupType,
-    this.uniqueChatIdentifier,
     this.customData,
   });
 
@@ -25,7 +23,6 @@ class SignupData {
         'userName': userName,
         'email': email,
         'signupType': signupType,
-        'uniqueChatIdentifier': uniqueChatIdentifier,
         'customData': customData,
       };
 }

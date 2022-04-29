@@ -7,8 +7,8 @@ import 'package:haptik_sdk/models/signup_data.dart';
 class HaptikSdk {
   static const MethodChannel _channel = MethodChannel('haptik_sdk');
 
-  Future init({InitData? initData}) {
-    return _channel.invokeMethod('init', initData?.toJson());
+  void init({InitData? initData}) {
+    _channel.invokeMethod('init', initData?.toJson());
   }
 
   Future<bool> loadSignupConversation(SignupData signupData) async {
@@ -20,8 +20,8 @@ class HaptikSdk {
     return (await _channel.invokeMethod('loadGuestConversation')) as bool;
   }
 
-  Future setNotificationToken(String deviceToken) {
-    return _channel.invokeMethod('setNotificationToken', deviceToken);
+  void setNotificationToken(String deviceToken) {
+    _channel.invokeMethod('setNotificationToken', deviceToken);
   }
 
   Future<bool> isHaptikNotification(Map<String, String> payload) async {
@@ -30,24 +30,24 @@ class HaptikSdk {
   }
 
   // smallIcon is drawable name of icon without extension
-  Future handleNotification(Map<String, String> payload,
+  void handleNotification(Map<String, String> payload,
       {String smallIcon = "ic_launcher"}) {
-    return _channel.invokeMethod('handleNotification',
+    _channel.invokeMethod('handleNotification',
         payload..putIfAbsent("small_icon", () => smallIcon));
   }
 
-  Future setLaunchMessage(String message, {bool hidden = false}) async {
+  void setLaunchMessage(String message, {bool hidden = false}) {
     _channel.invokeMethod(
       'setLaunchMessage',
       {"message": message, "hidden": hidden},
     );
   }
 
-  Future destroy() {
-    return _channel.invokeMethod('destroy');
+  void destroy() {
+    _channel.invokeMethod('destroy');
   }
 
-  Future logout() {
-    return _channel.invokeMethod('logout');
+  void logout() {
+    _channel.invokeMethod('logout');
   }
 }
