@@ -55,8 +55,8 @@ class HaptikSdkPlugin : FlutterPlugin, MethodCallHandler {
                     uniqueChatIdentifier = arguments["uniqueChatIdentifier"].toString()
                 }
 
-            },
-        );
+            }
+        )
     }
 
     private fun loadSignupConversation(arguments: Map<String, Any?>) {
