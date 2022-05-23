@@ -1,3 +1,6 @@
+/////2nd attempt
+
+
 import Flutter
 import UIKit
 import HPWebKit
@@ -11,8 +14,8 @@ public class SwiftHaptikSdkPlugin: NSObject, FlutterPlugin {
         private static var methodChannel: FlutterMethodChannel?
     //    private var flutterResult: Result?
 //    private var flutterRegistrar: FlutterPluginRegistrar?
-    private var viewController: FlutterViewController?
-    
+//    private var viewController: FlutterViewController?
+//    private var viewController = UIViewController()
 //    init(registrar: FlutterPluginRegistrar, viewController: FlutterViewController?) {
 //        self.flutterRegistrar = registrar
 //        self.viewController = viewController
@@ -75,12 +78,22 @@ public class SwiftHaptikSdkPlugin: NSObject, FlutterPlugin {
     
     private func loadSignupConversation(jsonData: JSON, result: @escaping FlutterResult) {
         
-        let viewController: FlutterViewController = (UIApplication.shared.delegate?.window??.rootViewController) as! FlutterViewController
-        var navigationController: UINavigationController?
-        if  let navController = viewController.navigationController {
-            navigationController = navController
-        }
-        if  let navigationController = navigationController {
+//        let viewController: FlutterViewController = (UIApplication.shared.delegate?.window??.rootViewController) as! FlutterViewController
+//
+        let vc = WkWebviewController()
+               vc.url = ""
+           let viewController = UIApplication.shared.keyWindow?.rootViewController
+           let nav = UINavigationController(rootViewController: vc)
+           nav.modalPresentationStyle = .fullScreen
+           viewController?.present(nav, animated: true)
+//        var navigationController: UINavigationController?
+//        self.viewController.view.frame = viewController.view.frame
+//        self.viewController.view.addSubview(viewController.view)
+//        navigationController = UINavigationController(rootViewController: viewController)
+////        if  let navController = viewController.navigationController {
+////            navigationController = navController
+////        }
+//        if  let navigationController = navigationController {
             let authAttribute = HPWebKit.HPAttributesBuilder.build { builder in
                 builder.authCode = jsonData["authCode"].stringValue
                 builder.authID = jsonData["authId"].stringValue
@@ -95,7 +108,7 @@ public class SwiftHaptikSdkPlugin: NSObject, FlutterPlugin {
             }
             
             do {
-                try HPKit.sharedSDK.loadConversation(launchController: navigationController, attributes: authAttribute, customData: customData)
+                try HPKit.sharedSDK.loadConversation(launchController: nav, attributes: authAttribute, customData: customData)
                 result(true)
                 //            flutterResult.success(response.status)
             } catch {
@@ -105,10 +118,10 @@ public class SwiftHaptikSdkPlugin: NSObject, FlutterPlugin {
             
             
             
-        }
-        else {
-            result(false)
-        }
+//        }
+//        else {
+//            result(false)
+//        }
         
         
         
@@ -120,15 +133,15 @@ public class SwiftHaptikSdkPlugin: NSObject, FlutterPlugin {
         
     }
     private func loadGuestConversation(result: @escaping FlutterResult) {
-        guard let viewController = viewController else { return }
-        do {
-            try HPKit.sharedSDK.loadGuestConversation(launchController: viewController, customData: nil)
-            result(true)
-            //            flutterResult.success(response.status)
-        } catch {
-            print(error)
-            result(false)
-        }
+//        guard let viewController = viewController else { return }
+//        do {
+//            try HPKit.sharedSDK.loadGuestConversation(launchController: viewController, customData: nil)
+//            result(true)
+//            //            flutterResult.success(response.status)
+//        } catch {
+//            print(error)
+//            result(false)
+//        }
         
     }
     
