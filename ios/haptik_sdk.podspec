@@ -16,8 +16,6 @@ Haptik SDK for Flutter
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'
   s.dependency 'HPWebKit', '0.2.7'
-  s.dependency 'SwiftyJSON'
-# s.dependency 'SSZipArchive'
   s.platform = :ios, '11.1'
   
   # Flutter.framework does not contain a i386 slice.

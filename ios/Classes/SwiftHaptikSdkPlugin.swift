@@ -4,22 +4,9 @@
 import Flutter
 import UIKit
 import HPWebKit
-import SwiftyJSON
-
-//Set 0 if adding the Production URL else keep it as 1 (Staging).
-typealias JsonDictionary = [String: Any]
-typealias StringDictionary = [String: String]
 
 public class SwiftHaptikSdkPlugin: NSObject, FlutterPlugin {
-        private static var methodChannel: FlutterMethodChannel?
-    //    private var flutterResult: Result?
-//    private var flutterRegistrar: FlutterPluginRegistrar?
-//    private var viewController: FlutterViewController?
-//    private var viewController = UIViewController()
-//    init(registrar: FlutterPluginRegistrar, viewController: FlutterViewController?) {
-//        self.flutterRegistrar = registrar
-//        self.viewController = viewController
-//    }
+    private static var methodChannel: FlutterMethodChannel?
     
     public func detachFromEngine(for registrar: FlutterPluginRegistrar) {
         SwiftHaptikSdkPlugin.methodChannel?.setMethodCallHandler(nil)
@@ -27,41 +14,56 @@ public class SwiftHaptikSdkPlugin: NSObject, FlutterPlugin {
     
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "haptik_sdk", binaryMessenger: registrar.messenger())
-//        let viewController: FlutterViewController = (UIApplication.shared.delegate?.window??.rootViewController) as! FlutterViewController
         let instance = SwiftHaptikSdkPlugin()
+        
         registrar.addMethodCallDelegate(instance, channel: channel)
         methodChannel = channel
-//        let methodChannel = FlutterMethodChannel(name: "navigation", binaryMessenger:controller.binaryMessenger)
-        //      let METHOD_CHANNEL_NAME = "flutter.native/nativeModule"
-        //           let controller : FlutterViewController = window?.rootViewController as! FlutterViewController
-        //          controller.navigationController?.interactivePopGestureRecognizer?.isEnabled = false;
+        
+        
+        if #available(iOS 15.0, *) {
+            let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene
+            ShareHelper.shared.flutterVC = UINavigationController(
+                rootViewController: scene!.windows.first!.rootViewController!)
+        } else {
+            let flutterController =
+            
+            UIApplication.shared.windows.first?.rootViewController as? FlutterViewController
+            ShareHelper.shared.flutterVC = UINavigationController(rootViewController: flutterController!)
+        }
+        
+        let flutterNav = ShareHelper.shared.flutterVC
+        if flutterNav != nil {
+            DispatchQueue.main.async {
+                flutterNav!.setNavigationBarHidden(true, animated: true)
+                UIApplication.shared.keyWindow!.rootViewController = flutterNav!
+                UIApplication.shared.keyWindow!.makeKeyAndVisible()
+            }
+        }
+        
+        
     }
     
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-//        result("iOS " + UIDevice.current.systemVersion)
-
         switch call.method {
         case "init":
-            initWithArguments(result: result)
+            initWithArguments(payload: call.arguments as! [String: Any], result: result)
         case "loadSignupConversation":
-            print("Haptic data")
-            print(call.arguments ?? "No Data")
             guard let arguments = call.arguments else { return }
-            let jsonData = JSON(arguments)
-            loadSignupConversation(jsonData: jsonData, result: result)
+            // let jsonData = JSON(arguments)
+            loadSignupConversation(payload: arguments as! [String: Any], result: result)
         case "loadGuestConversation": loadGuestConversation(result: result)
         case "setNotificationToken":
-            guard let deviceToken = call.arguments as? Data else { return }
-            HPKit.sharedSDK.setDeviceToken(deviceToken: deviceToken)
+            guard let deviceToken = call.arguments as? String else { return }
+            HPKit.sharedSDK.setDeviceToken(deviceToken: Data(deviceToken.utf8))
         case "isHaptikNotification":
-            guard let userInfo = call.arguments as? StringDictionary else { return }
+            guard let userInfo = call.arguments as? [String: Any] else { return }
             let haptikNotification = (HPKit.sharedSDK.canHandleNotificationWith(UserInfo: userInfo))
             result(haptikNotification)
         case "handleNotification":
-            guard let json = call.arguments as? StringDictionary else { return }
+            guard let json = call.arguments as? [String: Any] else { return }
             handleNotification(arguments: json)
         case "setLaunchMessage":
-            guard let json = call.arguments as? JsonDictionary else { return }
+            guard let json = call.arguments as? [String: Any] else { return }
             setLaunchMessage(arguments: json)
         case "destroy": destroy()
         case "logout": logout()
@@ -71,81 +73,55 @@ public class SwiftHaptikSdkPlugin: NSObject, FlutterPlugin {
         }
     }
     
-    private func initWithArguments(result: @escaping FlutterResult) {
+    private func initWithArguments(payload: [String: Any], result: @escaping FlutterResult) {
         HPKit.sharedSDK.setup()
+        if let uniqueChatIdentifier = payload["uniqueChatIdentifier"] as? String {
+            let customBuilder = HPCustomBuilder()
+            customBuilder.uniqueChatIdentifier = uniqueChatIdentifier
+            HPKit.sharedSDK.setCustomSettings(settings: customBuilder)
+        }
         result(true)
     }
     
-    private func loadSignupConversation(jsonData: JSON, result: @escaping FlutterResult) {
-        
-//        let viewController: FlutterViewController = (UIApplication.shared.delegate?.window??.rootViewController) as! FlutterViewController
-//
-        let vc = WkWebviewController()
-               vc.url = ""
-           let viewController = UIApplication.shared.keyWindow?.rootViewController
-           let nav = UINavigationController(rootViewController: vc)
-           nav.modalPresentationStyle = .fullScreen
-           viewController?.present(nav, animated: true)
-//        var navigationController: UINavigationController?
-//        self.viewController.view.frame = viewController.view.frame
-//        self.viewController.view.addSubview(viewController.view)
-//        navigationController = UINavigationController(rootViewController: viewController)
-////        if  let navController = viewController.navigationController {
-////            navigationController = navController
-////        }
-//        if  let navigationController = navigationController {
+    private func loadSignupConversation(payload: [String: Any], result: @escaping FlutterResult) {
+        do {
             let authAttribute = HPWebKit.HPAttributesBuilder.build { builder in
-                builder.authCode = jsonData["authCode"].stringValue
-                builder.authID = jsonData["authId"].stringValue
-                builder.userName = jsonData["userName"].stringValue
-                builder.email = jsonData["email"].stringValue
-                builder.mobile = jsonData["mobileNo"].stringValue
-                builder.signupType = jsonData["signupType"].stringValue
+                builder.authCode = payload["authCode"] as! String?
+                builder.authID = payload["authId"] as! String?
+                builder.userName = payload["userName"] as! String?
+                builder.email = payload["email"] as! String?
+                builder.mobile = payload["mobileNo"] as! String?
+                builder.signupType = payload["signupType"]  as! String
             }
-            var customData = StringDictionary()
-            if let data = jsonData["customData"].dictionaryObject as? StringDictionary {
+            var customData: [String: String]? = nil
+            if let data = payload["customData"] as? [String: String] {
                 customData = data
             }
             
-            do {
-                try HPKit.sharedSDK.loadConversation(launchController: nav, attributes: authAttribute, customData: customData)
-                result(true)
-                //            flutterResult.success(response.status)
-            } catch {
-                print(error)
-                result(false)
-            }
-            
-            
-            
-//        }
-//        else {
-//            result(false)
-//        }
-        
-        
-        
-        //            if (arguments["uniqueChatIdentifier"] != null) {
-        //                authId = "${arguments["authId"]}${arguments["uniqueChatIdentifier"]}"
-        //            } else {
-        //                authId = arguments["authId"].toString()
-        //            }
-        
-    }
-    private func loadGuestConversation(result: @escaping FlutterResult) {
-//        guard let viewController = viewController else { return }
-//        do {
-//            try HPKit.sharedSDK.loadGuestConversation(launchController: viewController, customData: nil)
-//            result(true)
-//            //            flutterResult.success(response.status)
-//        } catch {
-//            print(error)
-//            result(false)
-//        }
+            try HPKit.sharedSDK.loadConversation(launchController: ShareHelper.shared.flutterVC!.topViewController!, attributes: authAttribute, customData:
+                                                    customData)
+            result(true)
+        } catch {
+            //            print(error)
+            result(false)
+        }
         
     }
     
-    private func handleNotification(arguments: StringDictionary) {
+    private func loadGuestConversation(result: @escaping FlutterResult) {
+        
+        do {
+            try HPKit.sharedSDK.loadGuestConversation(
+                launchController: ShareHelper.shared.flutterVC!.topViewController!, customData: nil)
+            result(true)
+        } catch {
+            //                    print(error)
+            result(false)
+        }
+        
+    }
+    
+    private func handleNotification(arguments:  [String: Any]) {
         let haptikNotification = (HPKit.sharedSDK.canHandleNotificationWith(UserInfo: arguments))
         
         
@@ -160,23 +136,28 @@ public class SwiftHaptikSdkPlugin: NSObject, FlutterPlugin {
         //                   }
     }
     
-    private func setLaunchMessage(arguments: JsonDictionary) {
-        //            HaptikSDK.setLaunchMessage(
-        //                message = arguments["message"] as String,
-        //                hidden = arguments["hidden"] as Boolean
-        //            )
+    private func setLaunchMessage(arguments:  [String: Any]) {
+        HPKit.sharedSDK.setLaunchMessage(
+            message : arguments["message"] as! String,
+            hidden : arguments["hidden"] as! Bool
+        )
     }
     
     private func destroy() {
-        //                HPKit.sharedSDK.clearConversation()
+        
     }
     
     private func logout() {
-        //                HPKit.sharedSDK.clearConversation()
-        //         HPKit.sharedSDK.logout()
+        HPKit.sharedSDK.logout()
     }
     
     //        override func onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
     //            channel.setMethodCallHandler(null)
     //        }
+}
+
+class ShareHelper: NSObject {
+    static var shared: ShareHelper = ShareHelper()
+    var flutterVC: UINavigationController?
+    
 }

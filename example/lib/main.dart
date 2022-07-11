@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'dart:async';
 
-import 'package:flutter/services.dart';
 import 'package:haptik_sdk/haptik_sdk.dart';
 
 void main() {
@@ -16,17 +14,9 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  String _platformVersion = 'Unknown';
-
   @override
   void initState() {
     super.initState();
-    initPlatformState();
-  }
-
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlatformState() async {
-
   }
 
   @override
@@ -37,8 +27,13 @@ class _MyAppState extends State<MyApp> {
           title: const Text('Plugin example app'),
         ),
         body: Center(
-          child: Text('Running on: $_platformVersion\n'),
-        ),
+            child: ElevatedButton(
+          onPressed: () {
+            HaptikSdk().init();
+            HaptikSdk().loadGuestConversation();
+          },
+          child: const Text("Open"),
+        )),
       ),
     );
   }
