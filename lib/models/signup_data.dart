@@ -22,6 +22,7 @@ class SignupData {
         'authId': authId,
         'userName': userName,
         'email': email,
+        'mobileNo': mobileNo,
         'signupType': signupType,
         'customData': customData,
       };
